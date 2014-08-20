@@ -86,7 +86,7 @@ echo "*** Building mozjs ***"
 cd $BUILD_DIR/mozjs17*
 cd js/src
 # ./configure --disable-shared-js --prefix=$DESTDIR
-./configure --prefix=$DESTDIR
+./configure --prefix=$DEST_DIR
 make
 make install DESTDIR=$TARGET_DIR/mozjs_tmp
 rsync -avI $TARGET_DIR/mozjs_tmp/* $TARGET_DIR/ --remove-source-files

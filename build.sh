@@ -42,6 +42,63 @@ cd $BUILD_DIR
 ../fetchurl "http://downloads.sourceforge.net/project/pidgin/Pidgin/2.10.9/pidgin-2.10.9.tar.bz2"
 git clone https://github.com/xiehuc/pidgin-lwqq.git
 git clone https://github.com/xiehuc/lwqq.git
+git clone git@github.com:oglops/pidgin-sendscreenshot.git
+../fetchurl "http://dist.schmorp.de/libev/libev-4.15.tar.gz"
+# ../fetchurl "http://ftp.mozilla.org/pub/mozilla.org/js/mozjs-24.2.0.tar.bz2"
+../fetchurl "http://ftp.mozilla.org/pub/mozilla.org/js/mozjs17.0.0.tar.gz"
+# ../fetchurl "http://ftp.gnu.org/gnu/autoconf/autoconf-2.13.tar.gz"
+
+# echo "*** Building autoconf ***"
+# cd $BUILD_DIR/autoconf*
+# ./configure --prefix=$TARGET_DIR
+# make 
+# make install
+
+echo "*** Building libev ***"
+cd $BUILD_DIR/libev*
+./configure --enable-shared=no --prefix=$TARGET_DIR
+make 
+make install
+libev_pc=$TARGET_DIR/lib/pkgconfig/libev.pc
+if [ ! -f $libev_pc ]; then
+  echo "#### create libev.pc ####"
+  mkdir -p $TARGET_DIR/lib/pkgconfig
+  cat <<EOF > $libev_pc
+
+  prefix=$TARGET_DIR
+  exec_prefix=\${prefix}
+  libdir=\${prefix}/lib
+  includedir=\${exec_prefix}/include/libev
+
+  Name: libev
+  Description: High-performance event loop/event model
+  Version: 4.03
+  Libs: -L\${libdir} -lev
+  Libs.private: 
+  Cflags: -I\${includedir}
+EOF
+
+fi
+mkdir -p $TARGET_DIR/include/libev
+mv $TARGET_DIR/include/*.h $TARGET_DIR/include/libev
+
+echo "*** Building mozjs ***"
+cd $BUILD_DIR/mozjs17*
+cd js/src
+# ./configure --disable-shared-js --prefix=$DESTDIR
+./configure --prefix=$DESTDIR
+make
+make install DESTDIR=$TARGET_DIR/mozjs_tmp
+rsync -avI $TARGET_DIR/mozjs_tmp/* $TARGET_DIR/ --remove-source-files
+# update pc file
+MOZJS=$TARGET_DIR/lib/pkgconfig/mozjs-17.0.pc
+sed -e "s|prefix=|prefix=$TARGET_DIR|"  $MOZJS > mozjs_tmp.pc
+mv mozjs_tmp.pc $MOZJS
+sed -e "s|libdir=/lib|libdir=\${prefix}/lib|"  $MOZJS > mozjs_tmp.pc
+mv mozjs_tmp.pc $MOZJS
+sed -e "s|includedir=/include|includedir=\${prefix}/include|"  $MOZJS > mozjs_tmp.pc
+mv mozjs_tmp.pc $MOZJS
+rm -rf $TARGET_DIR/mozjs_tmp
 
 
 echo "*** Building pidgin ***"
@@ -59,10 +116,19 @@ echo "*** Building lwqq ***"
 cd $BUILD_DIR/lwqq
 git checkout -b dev origin/dev
 mkdir build && cd build
+
+sed -e "s|/usr/local/include/libev|/usr/local/include/libev\n$TARGET_DIR/include/libev|" $BUILD_DIR/lwqq/cmake/FindEV.cmake > FindEV_tmp.pc
+mv FindEV_tmp.pc $BUILD_DIR/lwqq/cmake/FindEV.cmake
+sed -e "s|/usr/local/lib64|/usr/local/lib64 $TARGET_DIR/lib|" $BUILD_DIR/lwqq/cmake/FindEV.cmake > FindEV_tmp.pc
+mv FindEV_tmp.pc $BUILD_DIR/lwqq/cmake/FindEV.cmake
+
 cmake ..
 make
-make install DESTDIR=$TARGET_DIR/tmp
+make install DESTDIR=$TARGET_DIR/lwqq_tmp
 rsync -av $TARGET_DIR/tmp/usr/local/* $TARGET_DIR/ --remove-source-files
+sed -e "s|prefix=/usr/local|prefix=$TARGET_DIR|" $TARGET_DIR/lib/pkgconfig/lwqq.pc > xxx.pc
+mv xxx.pc $TARGET_DIR/lib/pkgconfig/lwqq.pc
+rm -rf TARGET_DIR/lwqq_tmp
 
 
 echo "*** Building pidgin-lwqq ***"
@@ -71,11 +137,22 @@ git checkout -b dev origin/dev
 mkdir build && cd build
 cmake ..
 make
-make install prefix=$TARGET_DIR
+make install DESTDIR=$TARGET_DIR/pidgin_tmp
+rsync -avI $TARGET_DIR/pidgin_tmp/usr/local/* $TARGET_DIR/ --remove-source-files
+rsync -avI $TARGET_DIR/pidgin_tmp/usr/share $TARGET_DIR/ --remove-source-files
+rsync -avI $TARGET_DIR/pidgin_tmp/$TARGET_DIR/* $TARGET_DIR/ --remove-source-files
+rm -rf TARGET_DIR/pidgin_tmp
 
-
-
-
+echo "*** Building pidgin-sendscreenshot ***"
+cd $BUILD_DIR/pidgin-sendscreenshot
+git fetch
+git checkout dev
+./configure --prefix=$DESTDIR
+make
+make install
+# make install DESTDIR=$DESTDIR/screenshot_tmp
+# rsync -avI $TARGET_DIR/screenshot_tmp$TARGET_DIR/* $TARGET_DIR/ --remove-source-files
+# rsync -avI $TARGET_DIR/screenshot_tmp/var${BUILD_DIR#/usr}/* $TARGET_DIR/ --remove-source-files
 
 # # FIXME: only OS-specific
 # rm -f "$TARGET_DIR/lib/*.dylib"

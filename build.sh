@@ -171,6 +171,18 @@ cmake -D CMAKE_INSTALL_PREFIX=$TARGET_DIR .
 make
 make install
 
+
+# add libnotify in case you don't have it, on centos 7 by default you need this
+echo "*** Building libnotify ***"
+cd $BUILD_DIR
+wget http://ftp.gnome.org/pub/GNOME/sources/libnotify/0.7/libnotify-0.7.6.tar.xz
+tar -xvf libnotify-0.7.6.tar.xz
+rm libnotify-0.7.6.tar.xz
+cd $BUILD_DIR/libnotify*
+./configure --prefix=$TARGET_DIR
+make
+make install
+
 echo "*** Building pidgin-libnotify ***"
 cd $BUILD_DIR/pidgin-libnotify*
 ./autogen.sh

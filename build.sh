@@ -60,7 +60,8 @@ git clone https://github.com/tony2001/pidgin-libnotify.git
 
 echo "*** Building libev ***"
 cd $BUILD_DIR/libev*
-./configure --enable-shared=no --prefix=$TARGET_DIR
+# ./configure --enable-shared=no --prefix=$TARGET_DIR
+./configure --prefix=$TARGET_DIR
 make 
 make install
 libev_pc=$TARGET_DIR/lib/pkgconfig/libev.pc
@@ -90,11 +91,12 @@ echo "*** Building mozjs ***"
 cd $BUILD_DIR/mozjs17*
 cd js/src
 # ./configure --disable-shared-js --prefix=$DESTDIR
-# ./configure --prefix=$TARGET_DIR
-./configure
+./configure --prefix=$TARGET_DIR
+# ./configure
 make
-make install DESTDIR=$TARGET_DIR/mozjs_tmp
-rsync -avI $TARGET_DIR/mozjs_tmp/* $TARGET_DIR/ --remove-source-files
+# make install DESTDIR=$TARGET_DIR/mozjs_tmp
+make install
+# rsync -avI $TARGET_DIR/mozjs_tmp/usr/local/* $TARGET_DIR/ #--remove-source-files
 # update pc file
 MOZJS=$TARGET_DIR/lib/pkgconfig/mozjs-17.0.pc
 sed -e "s|prefix=|prefix=$TARGET_DIR|"  $MOZJS > mozjs_tmp.pc
@@ -130,7 +132,7 @@ mv FindEV_tmp.pc $BUILD_DIR/lwqq/cmake/FindEV.cmake
 cmake ..
 make
 make install DESTDIR=$TARGET_DIR/lwqq_tmp
-rsync -av $TARGET_DIR/tmp/usr/local/* $TARGET_DIR/ --remove-source-files
+rsync -av $TARGET_DIR/lwqq_tmp/usr/local/* $TARGET_DIR/ --remove-source-files
 sed -e "s|prefix=/usr/local|prefix=$TARGET_DIR|" $TARGET_DIR/lib/pkgconfig/lwqq.pc > xxx.pc
 mv xxx.pc $TARGET_DIR/lib/pkgconfig/lwqq.pc
 rm -rf TARGET_DIR/lwqq_tmp
@@ -152,7 +154,7 @@ echo "*** Building pidgin-sendscreenshot ***"
 cd $BUILD_DIR/pidgin-sendscreenshot
 git fetch
 git checkout dev
-./configure --prefix=$DESTDIR
+./configure --prefix=$TARGET_DIR
 make
 make install
 
@@ -169,11 +171,10 @@ cmake -D CMAKE_INSTALL_PREFIX=$TARGET_DIR .
 make
 make install
 
-
-
+echo "*** Building pidgin-libnotify ***"
 cd $BUILD_DIR/pidgin-libnotify*
-./autogen
-./configure --prefix=$DESTDIR
+./autogen.sh
+./configure --prefix=$TARGET_DIR
 make
 make install
 

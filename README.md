@@ -1,4 +1,4 @@
-Pidgin static build
+Pidgin with lwqq static build 
 ===================
 
 本来是想得到一个portable的pidgin，这样可以拷给别人用，因为在公司没权限装.

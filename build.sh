@@ -178,23 +178,7 @@ cd $BUILD_DIR/pidgin-libnotify*
 make
 make install
 
-
-# make install DESTDIR=$DESTDIR/screenshot_tmp
-# rsync -avI $TARGET_DIR/screenshot_tmp$TARGET_DIR/* $TARGET_DIR/ --remove-source-files
-# rsync -avI $TARGET_DIR/screenshot_tmp/var${BUILD_DIR#/usr}/* $TARGET_DIR/ --remove-source-files
-
 # # FIXME: only OS-specific
 # rm -f "$TARGET_DIR/lib/*.dylib"
 # rm -f "$TARGET_DIR/lib/*.so"
 
-# # FFMpeg
-# echo "*** Building FFmpeg ***"
-# cd $BUILD_DIR/ffmpeg*
-
-# # comment out the "require_pkg_config librtmp ..." line
-# # this line assumes you have installed librtmp to your /usr/lib64 
-# # but here i want a "static" build
-# # sed -i.bak '/enabled librtmp/s/^/# /' configure
-
-# CFLAGS="-I$TARGET_DIR/include" LDFLAGS="-L$TARGET_DIR/lib -lm" ./configure --prefix=${OUTPUT_DIR:-$TARGET_DIR} --extra-cflags="-I$TARGET_DIR/include -static" --extra-ldflags="-L$TARGET_DIR/lib -lm -static" --extra-version=static --disable-debug --disable-shared --enable-static --extra-cflags=--static --disable-ffplay --disable-ffserver --disable-doc --enable-gpl --enable-pthreads --enable-postproc --enable-gray --enable-runtime-cpudetect --enable-libfaac --enable-libmp3lame --enable-libopus --enable-libtheora --enable-libvorbis --enable-libx264 --enable-libxvid --enable-bzlib --enable-zlib --enable-nonfree --enable-version3 --enable-libvpx --disable-devices --enable-librtmp  --extra-libs="-ldl"
-# make -j $jval && make install

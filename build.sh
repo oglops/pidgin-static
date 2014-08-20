@@ -47,6 +47,10 @@ git clone git@github.com:oglops/pidgin-sendscreenshot.git
 # ../fetchurl "http://ftp.mozilla.org/pub/mozilla.org/js/mozjs-24.2.0.tar.bz2"
 ../fetchurl "http://ftp.mozilla.org/pub/mozilla.org/js/mozjs17.0.0.tar.gz"
 # ../fetchurl "http://ftp.gnu.org/gnu/autoconf/autoconf-2.13.tar.gz"
+../fetchurl "https://pidgin-gnome-keyring.googlecode.com/files/pidgin-gnome-keyring-1.20_src.tar.gz"
+git clone https://github.com/interskh/Recent-Contacts-Plugin-for-Pidgin.git
+git clone https://github.com/tony2001/pidgin-libnotify.git
+
 
 # echo "*** Building autoconf ***"
 # cd $BUILD_DIR/autoconf*
@@ -86,7 +90,8 @@ echo "*** Building mozjs ***"
 cd $BUILD_DIR/mozjs17*
 cd js/src
 # ./configure --disable-shared-js --prefix=$DESTDIR
-./configure --prefix=$DEST_DIR
+# ./configure --prefix=$TARGET_DIR
+./configure
 make
 make install DESTDIR=$TARGET_DIR/mozjs_tmp
 rsync -avI $TARGET_DIR/mozjs_tmp/* $TARGET_DIR/ --remove-source-files
@@ -150,6 +155,29 @@ git checkout dev
 ./configure --prefix=$DESTDIR
 make
 make install
+
+
+echo "*** Building pidgin-gnome-keyring ***"
+cd $BUILD_DIR/pidgin-gnome-keyring*
+make
+# it copies gnome-keyring.so ~/.purple/plugins/
+make install 
+
+echo "*** Building Recent-Contacts-Plugin-for-Pidgin ***"
+cd $BUILD_DIR/Recent-Contacts-Plugin-for-Pidgin*
+cmake -D CMAKE_INSTALL_PREFIX=$TARGET_DIR .
+make
+make install
+
+
+
+cd $BUILD_DIR/pidgin-libnotify*
+./autogen
+./configure --prefix=$DESTDIR
+make
+make install
+
+
 # make install DESTDIR=$DESTDIR/screenshot_tmp
 # rsync -avI $TARGET_DIR/screenshot_tmp$TARGET_DIR/* $TARGET_DIR/ --remove-source-files
 # rsync -avI $TARGET_DIR/screenshot_tmp/var${BUILD_DIR#/usr}/* $TARGET_DIR/ --remove-source-files
